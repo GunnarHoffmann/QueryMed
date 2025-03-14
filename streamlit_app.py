@@ -18,7 +18,8 @@ def search_aliva_api(medicine_name):
             product_info = first_hit.get("variantValues", [{}])[0]
             name = product_info.get("produktbezeichnung_shop", "Unbekannt")
             link = product_info.get("link", "Unbekannt")
-            #link = f"https://www.aliva.de/p/{pzn}" if pzn != "Keine PZN" else "https://www.aliva.de"
+            if link != "Unbekannt":
+                link = f"https://www.aliva.de/p/{link}"
 
             return {"name": name, "link": link}
 
