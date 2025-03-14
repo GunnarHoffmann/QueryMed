@@ -11,16 +11,20 @@ def search_aliva(medicine_name):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Suche nach den Produkten
+        # Suche nach Produkten mit der Klasse "product-box"
         products = soup.find_all("div", class_="product-box")
 
         results = []
         for product in products:
-            name_tag = product.find("a", class_="product-title")
-            if name_tag:
+            name_tag = product.find("a", class_="product-title")  # Name des Produkts
+            price_tag = product.find("span", class_="product-price")  # Preis des Produkts
+            
+            if name_tag and price_tag:
                 name = name_tag.get_text(strip=True)
+                price = price_tag.get_text(strip=True)
                 link = "https://www.aliva.de" + name_tag["href"]
-                results.append({"name": name, "link": link})
+                
+                results.append({"name": name, "price": price, "link": link})
 
         return results if results else None
     except requests.RequestException as e:
@@ -38,11 +42,12 @@ if st.button("🔍 Suchen"):
     if isinstance(result, list):
         st.success(f"{len(result)} Produkte gefunden:")
         for product in result:
-            st.markdown(f"- [{product['name']}]({product['link']})")
+            st.markdown(f"- **{product['name']}** - Preis: {product['price']} [Produktlink]({product['link']})")
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
         st.warning("Keine Produkte gefunden.")
+
 
 
 
