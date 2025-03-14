@@ -13,7 +13,7 @@ def search_medicine(medicine_name):
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Find the first product link
-        product = soup.find("a", class_="product-card-cta")  # Adjust class if needed
+        product = soup.find("a", class_="items")  # Adjust class if needed
 
         if product:
             product_link = "https://www.shop-apotheke.com" + product["href"]
