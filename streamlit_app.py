@@ -45,7 +45,7 @@ if st.button("🔍 Suchen"):
         st.markdown(f"### {result['name']}")
         st.markdown(f"🔗 [Produktlink]({result['link']})")
         if result['image_url']:
-            st.image(result['image_url'], caption=result['name'], use_column_width=True)
+            st.image(result['image_url'], caption=result['name'], width=200)
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
