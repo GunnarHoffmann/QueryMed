@@ -2,41 +2,45 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-def search_medicine(medicine_name):
-    """Search for a medicine on Shop-Apotheke.de and return the product link if found."""
-    search_url = f"https://www.shop-apotheke.com/search.htm?query={medicine_name}"
+def search_aliva(medicine_name):
+    search_url = f"https://www.aliva.de/search?query={medicine_name}"
     headers = {"User-Agent": "Mozilla/5.0"}
 
     try:
         response = requests.get(search_url, headers=headers)
         response.raise_for_status()
+
         soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Produkte auf der Ergebnisseite suchen
+        products = soup.find_all("a", class_="product__link")
 
-        # Find the first product link
-        product = soup.find("a", class_="o-SearchProductListItem")  # Adjust class if needed
+        results = []
+        for product in products:
+            name = product.get_text(strip=True)
+            link = "https://www.aliva.de" + product["href"]
+            results.append({"name": name, "link": link})
 
-        if product:
-            product_link = "https://www.shop-apotheke.com" + product["href"]
-            return product_link
-        else:
-            return None  # No product found
+        return results if results else None
     except requests.RequestException as e:
         return f"Error: {e}"
 
 # Streamlit UI
-st.title("Medicine Availability Checker")
+st.title("🔎 Medikamentencheck auf aliva.de")
 
-# Default value
-medicine_name = st.text_input("Enter medicine name:", "Terzolin")
+medicine_name = st.text_input("Medikament eingeben:", "Terzolin")
 
-if st.button("Search"):
-    with st.spinner("Searching..."):
-        result = search_medicine(medicine_name)
+if st.button("🔍 Suchen"):
+    with st.spinner("Suche auf aliva.de läuft..."):
+        result = search_aliva(medicine_name)
 
-    if isinstance(result, str) and result.startswith("https://"):
-        st.success(f"Medicine found! [Click here]({result}) to view on Shop-Apotheke.de")
+    if isinstance(result, list):
+        st.success(f"{len(result)} Produkte gefunden:")
+        for product in result:
+            st.markdown(f"- [{product['name']}]({product['link']})")
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
-        st.warning("Medicine not found on Shop-Apotheke.de.")
+        st.warning("Keine Produkte gefunden.")
+
 
