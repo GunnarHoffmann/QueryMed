@@ -19,7 +19,7 @@ def search_medicine(medicine_name):
             product_link = "https://www.shop-apotheke.com" + product["href"]
             return product_link
         else:
-            return None
+            return None  # No product found
     except requests.RequestException as e:
         return f"Error: {e}"
 
@@ -32,10 +32,10 @@ medicine_name = st.text_input("Enter medicine name:", "Terzolin")
 if st.button("Search"):
     with st.spinner("Searching..."):
         result = search_medicine(medicine_name)
-    
-    if result and "https://" in result:
+
+    if isinstance(result, str) and result.startswith("https://"):
         st.success(f"Medicine found! [Click here]({result}) to view on Shop-Apotheke.de")
-    elif result.startswith("Error"):
+    elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
         st.warning("Medicine not found on Shop-Apotheke.de.")
