@@ -9,29 +9,30 @@ def search_aliva(medicine_name):
     try:
         response = requests.get(search_url, headers=headers)
         response.raise_for_status()
-
         soup = BeautifulSoup(response.text, "html.parser")
-        
-        # Produkte auf der Ergebnisseite suchen
-        products = soup.find_all("a", class_="product__link")
+
+        # Suche nach den Produkten
+        products = soup.find_all("div", class_="product-box")
 
         results = []
         for product in products:
-            name = product.get_text(strip=True)
-            link = "https://www.aliva.de" + product["href"]
-            results.append({"name": name, "link": link})
+            name_tag = product.find("a", class_="product-title")
+            if name_tag:
+                name = name_tag.get_text(strip=True)
+                link = "https://www.aliva.de" + name_tag["href"]
+                results.append({"name": name, "link": link})
 
         return results if results else None
     except requests.RequestException as e:
         return f"Error: {e}"
 
 # Streamlit UI
-st.title("🔎 Medikamentencheck auf aliva.de")
+st.title("🔎 Medikamenten-Suche auf aliva.de")
 
 medicine_name = st.text_input("Medikament eingeben:", "Terzolin")
 
 if st.button("🔍 Suchen"):
-    with st.spinner("Suche auf aliva.de läuft..."):
+    with st.spinner("Suche läuft..."):
         result = search_aliva(medicine_name)
 
     if isinstance(result, list):
@@ -42,5 +43,6 @@ if st.button("🔍 Suchen"):
         st.error(result)
     else:
         st.warning("Keine Produkte gefunden.")
+
 
 
