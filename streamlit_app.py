@@ -1,32 +1,26 @@
 import streamlit as st
 import requests
-from bs4 import BeautifulSoup
+import json
 
-def search_aliva(medicine_name):
-    search_url = f"https://www.aliva.de/search?query={medicine_name}"
+def search_aliva_api(medicine_name):
+    api_url = f"https://www.aliva.de/fact-finder/proxy/rest/v5/search/aliva_de_live?query={medicine_name}&format=json"
     headers = {"User-Agent": "Mozilla/5.0"}
-
+    
     try:
-        response = requests.get(search_url, headers=headers)
+        response = requests.get(api_url, headers=headers)
         response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        # Suche nach Produkten mit der Klasse "product-box"
-        products = soup.find_all("div", class_="product-box")
-
-        results = []
-        for product in products:
-            name_tag = product.find("a", class_="product-title")  # Name des Produkts
-            price_tag = product.find("span", class_="product-price")  # Preis des Produkts
+        data = response.json()
+        
+        if "hits" in data and len(data["hits"]) > 0:
+            first_hit = data["hits"][0]
+            product_info = first_hit.get("variantValues", [{}])[0]
+            name = product_info.get("produktbezeichnung_shop", "Unbekannt")
+            pzn = product_info.get("pzn", "Keine PZN")
+            link = f"https://www.aliva.de/p/{pzn}" if pzn != "Keine PZN" else "https://www.aliva.de"
             
-            if name_tag and price_tag:
-                name = name_tag.get_text(strip=True)
-                price = price_tag.get_text(strip=True)
-                link = "https://www.aliva.de" + name_tag["href"]
-                
-                results.append({"name": name, "price": price, "link": link})
-
-        return results if results else None
+            return {"name": name, "link": link}
+        
+        return None
     except requests.RequestException as e:
         return f"Error: {e}"
 
@@ -37,16 +31,16 @@ medicine_name = st.text_input("Medikament eingeben:", "Terzolin")
 
 if st.button("🔍 Suchen"):
     with st.spinner("Suche läuft..."):
-        result = search_aliva(medicine_name)
+        result = search_aliva_api(medicine_name)
 
-    if isinstance(result, list):
-        st.success(f"{len(result)} Produkte gefunden:")
-        for product in result:
-            st.markdown(f"- **{product['name']}** - Preis: {product['price']} [Produktlink]({product['link']})")
+    if isinstance(result, dict):
+        st.success("Erstes Produkt gefunden:")
+        st.markdown(f"### {result['name']}")
+        st.markdown(f"🔗 [Produktlink]({result['link']})")
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
-        st.warning("Keine Produkte gefunden.")
+        st.warning("Kein Produkt gefunden.")
 
 
 
