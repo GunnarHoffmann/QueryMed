@@ -41,11 +41,11 @@ if st.button("🔍 Suchen"):
         result = search_aliva_api(medicine_name)
 
     if isinstance(result, dict):
-        st.success("Erstes Produkt gefunden:")
+        st.success("Produkt gefunden:")
         st.markdown(f"### {result['name']}")
-        st.markdown(f"🔗 [Produktlink]({result['link']})")
         if result['image_url']:
             st.image(result['image_url'], caption=result['name'], width=200)
+        st.markdown(f"🔗 [Produktlink]({result['link']})")
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
