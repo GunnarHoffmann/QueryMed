@@ -38,4 +38,4 @@ if st.button("Search"):
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
-        st.warning("Medicine not found on Shop-Apotheke.de.{result}")
+        st.warning(f"Medicine not found on Shop-Apotheke.de.{result}")
