@@ -33,7 +33,7 @@ def search_aliva_api(medicine_name):
 # Streamlit UI
 st.title("🔎 Medikamenten-Suche auf aliva.de")
 
-medicine_name = st.text_input("Medikament eingeben:", "Terzolin")
+medicine_name = st.text_input("Medikament eingeben:", "Aspirin")
 
 if st.button("🔍 Suchen"):
     with st.spinner("Suche läuft..."):
