@@ -18,10 +18,11 @@ def search_aliva_api(medicine_name):
             product_info = first_hit.get("variantValues", [{}])[0]
             name = product_info.get("produktbezeichnung_shop", "Unbekannt")
             link = product_info.get("link", "Unbekannt")
+            image_url = product_info.get("hauptbild_72dpi", "")
             if link != "Unbekannt":
                 link = f"https://www.aliva.de{link}"
 
-            return {"name": name, "link": link}
+            return {"name": name, "link": link, "image_url": image_url}
 
         return None  # Return None if no hits are found
     except requests.RequestException as e:
@@ -43,6 +44,8 @@ if st.button("🔍 Suchen"):
         st.success("Erstes Produkt gefunden:")
         st.markdown(f"### {result['name']}")
         st.markdown(f"🔗 [Produktlink]({result['link']})")
+        if result['image_url']:
+            st.image(result['image_url'], caption=result['name'], use_column_width=True)
     elif isinstance(result, str) and result.startswith("Error"):
         st.error(result)
     else:
